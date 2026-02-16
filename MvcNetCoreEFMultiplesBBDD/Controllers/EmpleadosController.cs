@@ -24,5 +24,17 @@ namespace MvcNetCoreEFMultiplesBBDD.Controllers
             VistaEmpleado vista = await repo.FindVistaEmpleadoAsync(id);
             return View(vista);
         }
+
+        public async Task<IActionResult> Insert()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Insert(string apellido, string oficio, int dir, int salario, int comision, string dept)
+        {
+            int empNo = await repo.InsertEmp(apellido, oficio, dir, salario, comision, dept);
+            return RedirectToAction("Details", new { id = empNo });
+        }
     }
 }
