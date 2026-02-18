@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MvcNetCoreEFMultiplesBBDD.Data;
 using MvcNetCoreEFMultiplesBBDD.Models;
+using MySql.Data.MySqlClient;
 using Mysqlx.Crud;
 using Mysqlx.Cursor;
 using Oracle.ManagedDataAccess.Client;
@@ -45,7 +46,7 @@ namespace MvcNetCoreEFMultiplesBBDD.Repositories
     //    SELECT DEPT_NO INTO dept_no FROM DEPT WHERE DNOMBRE = dept;
     //    SET fecha = NOW();
 
-    //    INSERT INTO EMP(EMP_NO, APELLIDO, OFICIO, DIR, FECHA_ALTA, SALARIO, COMISION, DEPT_NO)
+    //    INSERT INTO EMP(EMP_NO, APELLIDO, OFICIO, DIR, FECHA_ALT, SALARIO, COMISION, DEPT_NO)
     //    VALUES(emp_no, apellido, oficio, dir, fecha, salario, comision, dept_no);
     //    END$$
     //DELIMITER ;
@@ -62,22 +63,20 @@ namespace MvcNetCoreEFMultiplesBBDD.Repositories
 
         public async Task<int> InsertEmp(string apellido, string oficio, int dir, int salario, int comision, string dept)
         {
-            string sql = "SP_INSERTAR_EMP @apellido, @oficio, @dir, @salario, @comision, @dept";
-            SqlParameter pamApellido = new SqlParameter("@apellido", apellido);
-            SqlParameter pamOficio = new SqlParameter("@oficio", oficio);
-            SqlParameter pamDir = new SqlParameter("@dir", dir);
-            SqlParameter pamSalario = new SqlParameter("@salario", salario);
-            SqlParameter pamComision = new SqlParameter("@comision", comision);
-            SqlParameter pamDept = new SqlParameter("@dept", dept);
+            string sql = "CALL SP_INSERTAR_EMP(@apellido, @oficio, @dir, @salario, @comision, @dept, @emp_no)";
+            MySqlParameter pamApellido = new MySqlParameter("@apellido", apellido);
+            MySqlParameter pamOficio = new MySqlParameter("@oficio", oficio);
+            MySqlParameter pamDir = new MySqlParameter("@dir", dir);
+            MySqlParameter pamSalario = new MySqlParameter("@salario", salario);
+            MySqlParameter pamComision = new MySqlParameter("@comision", comision);
+            MySqlParameter pamDept = new MySqlParameter("@dept", dept);
 
-            SqlParameter pamDeptNo = new SqlParameter("@dept_no", dept);
-            pamDeptNo.ParameterName = ("@dept_no");
-            pamDeptNo.Direction = System.Data.ParameterDirection.Output;
-            pamDeptNo.DbType = System.Data.DbType.Int32;
+            MySqlParameter pamEmpNo = new MySqlParameter("@emp_no", MySqlDbType.Int32);
+            pamEmpNo.Direction = System.Data.ParameterDirection.Output;
 
-            await context.Database.ExecuteSqlRawAsync(sql, pamApellido, pamOficio, pamDir, pamSalario, pamComision, pamDept);
+            await context.Database.ExecuteSqlRawAsync(sql, pamApellido, pamOficio, pamDir, pamSalario, pamComision, pamDept, pamEmpNo);
 
-            return (int)pamDeptNo.Value;
+            return (int)pamEmpNo.Value;
         }
 
         public async Task<List<VistaEmpleado>> GetVistaEmpleadosAsync()
